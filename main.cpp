@@ -1,312 +1,238 @@
-﻿#include <iostream>
-#include <fstream>
-#include <vector>
-#include <memory>
-#include <string>
-#include <sstream>
+#include <iostream>  // 標準入出力ストリームを使用するためのヘッダー
+#include <fstream>   // ファイル入出力を扱うためのヘッダー
+#include <vector>    // ベクターコンテナを使用するためのヘッダー
+#include <memory>    // スマートポインタを使用するためのヘッダー
+#include <string>    // 文字列操作を行うためのヘッダー
+#include <sstream>   // 文字列ストリームを使用するためのヘッダー
 
 using namespace std;
 
-// 抽象クラス Shape: 基本的な形状を表すクラス。各形状クラスはこれを継承して具象化する。
+// Shapeクラス
 class Shape {
 public:
-    virtual ~Shape() = default; // デストラクタ
-    virtual string toOpenSCAD() const = 0; // OpenSCAD形式のコードを生成する純粋仮想関数。
-    virtual void setPosition(double x, double y, double z) = 0; // 位置を設定する純粋仮想関数。
-    virtual string getPosition() const = 0; // 位置をOpenSCAD形式で取得する純粋仮想関数。
+    virtual ~Shape() = default; // 仮想デストラクタ
+    virtual string toOpenSCAD() const = 0; // OpenSCAD形式の文字列を返す純粋仮想関数
+    virtual void setPosition(double x, double y, double z) = 0; // 位置を設定する純粋仮想関数
+    virtual string getPosition() const = 0; // 位置を取得する純粋仮想関数
 };
 
-// 立方体を表すクラス Cube
+// Cubeクラス
 class Cube : public Shape {
-    double width, height, depth; // 立方体の幅、高さ、奥行き。
-    double posX, posY, posZ; // 立方体の位置。
+    double width, height, depth; // 立方体の幅、高さ、奥行き
+    double posX, posY, posZ; // 立方体の位置（x, y, z）
 public:
-    // コンストラクタで幅、高さ、奥行きを初期化。位置は(0,0,0)。
     Cube(double w, double h, double d) : width(w), height(h), depth(d), posX(0), posY(0), posZ(0) {}
-
-    // 位置を設定する関数
     void setPosition(double x, double y, double z) override {
-        posX = x;
-        posY = y;
-        posZ = z;
+        posX = x; posY = y; posZ = z; // 位置を設定
     }
-
-    // 位置をOpenSCAD形式で返す関数
     string getPosition() const override {
+        // 位置を表すOpenSCADコードを返す
         return "translate([" + to_string(posX) + ", " + to_string(posY) + ", " + to_string(posZ) + "]) ";
     }
-
-    // OpenSCAD形式のコードを生成する関数
     string toOpenSCAD() const override {
+        // 立方体のOpenSCADコードを返す
         return getPosition() + "cube([" + to_string(width) + ", " + to_string(height) + ", " + to_string(depth) + "]);";
     }
 };
 
-// 球を表すクラス Sphere
+// Sphereクラス
 class Sphere : public Shape {
     double radius; // 球の半径
-    double posX, posY, posZ; // 球の位置
+    double posX, posY, posZ; // 球の位置（x, y, z）
 public:
-    // コンストラクタで半径を初期化。位置は(0,0,0)。
     Sphere(double r) : radius(r), posX(0), posY(0), posZ(0) {}
-
-    // 位置を設定する関数
     void setPosition(double x, double y, double z) override {
-        posX = x;
-        posY = y;
-        posZ = z;
+        posX = x; posY = y; posZ = z; // 位置を設定
     }
-
-    // 位置をOpenSCAD形式で返す関数
     string getPosition() const override {
+        // 位置を表すOpenSCADコードを返す
         return "translate([" + to_string(posX) + ", " + to_string(posY) + ", " + to_string(posZ) + "]) ";
     }
-
-    // OpenSCAD形式のコードを生成する関数
     string toOpenSCAD() const override {
+        // 球のOpenSCADコードを返す
         return getPosition() + "sphere(r=" + to_string(radius) + ");";
     }
 };
 
-// 円柱を表すクラス Cylinder
+// Cylinderクラス
 class Cylinder : public Shape {
     double radius, height; // 円柱の半径と高さ
-    double posX, posY, posZ; // 円柱の位置
+    double posX, posY, posZ; // 円柱の位置（x, y, z）
 public:
-    // コンストラクタで半径と高さを初期化。位置は(0,0,0)。
     Cylinder(double r, double h) : radius(r), height(h), posX(0), posY(0), posZ(0) {}
-
-    // 位置を設定する関数
     void setPosition(double x, double y, double z) override {
-        posX = x;
-        posY = y;
-        posZ = z;
+        posX = x; posY = y; posZ = z; // 位置を設定
     }
-
-    // 位置をOpenSCAD形式で返す関数
     string getPosition() const override {
+        // 位置を表すOpenSCADコードを返す
         return "translate([" + to_string(posX) + ", " + to_string(posY) + ", " + to_string(posZ) + "]) ";
     }
-
-    // OpenSCAD形式のコードを生成する関数
     string toOpenSCAD() const override {
+        // 円柱のOpenSCADコードを返す
         return getPosition() + "cylinder(h=" + to_string(height) + ", r=" + to_string(radius) + ");";
     }
 };
 
-// 円錐台を表すクラス Frustum
+// Frustumクラス
 class Frustum : public Shape {
     double bottomRadius, topRadius, height; // 円錐台の底面半径、上面半径、高さ
-    double posX, posY, posZ; // 円錐台の位置
+    double posX, posY, posZ; // 円錐台の位置（x, y, z）
 public:
-    // コンストラクタで各パラメータを初期化。位置は(0,0,0)。
     Frustum(double br, double tr, double h) : bottomRadius(br), topRadius(tr), height(h), posX(0), posY(0), posZ(0) {}
-
-    // 位置を設定する関数
     void setPosition(double x, double y, double z) override {
-        posX = x;
-        posY = y;
-        posZ = z;
+        posX = x; posY = y; posZ = z; // 位置を設定
     }
-
-    // 位置をOpenSCAD形式で返す関数
     string getPosition() const override {
+        // 位置を表すOpenSCADコードを返す
         return "translate([" + to_string(posX) + ", " + to_string(posY) + ", " + to_string(posZ) + "]) ";
     }
-
-    // OpenSCAD形式のコードを生成する関数
     string toOpenSCAD() const override {
+        // 円錐台のOpenSCADコードを返す
         return getPosition() + "cylinder(h=" + to_string(height) + ", r1=" + to_string(bottomRadius) + ", r2=" + to_string(topRadius) + ");";
     }
 };
 
-// トーラスを表すクラス Torus
+// Torusクラス
 class Torus : public Shape {
-    double majorRadius, minorRadius; // トーラスの輪の半径と断面の半径
-    double posX, posY, posZ; // トーラスの位置
+    double majorRadius, minorRadius; // トーラスの大半径と小半径
+    double posX, posY, posZ; // トーラスの位置（x, y, z）
 public:
-    // コンストラクタで各パラメータを初期化。位置は(0,0,0)。
     Torus(double mr, double nr) : majorRadius(mr), minorRadius(nr), posX(0), posY(0), posZ(0) {}
-
-    // 位置を設定する関数
     void setPosition(double x, double y, double z) override {
-        posX = x;
-        posY = y;
-        posZ = z;
+        posX = x; posY = y; posZ = z; // 位置を設定
     }
-
-    // 位置をOpenSCAD形式で返す関数
     string getPosition() const override {
+        // 位置を表すOpenSCADコードを返す
         return "translate([" + to_string(posX) + ", " + to_string(posY) + ", " + to_string(posZ) + "]) ";
     }
-
-    // OpenSCAD形式のコードを生成する関数
     string toOpenSCAD() const override {
+        // トーラスのOpenSCADコードを返す
         return getPosition() + "rotate_extrude(angle=360) translate([" + to_string(majorRadius) + ", 0, 0]) circle(r=" + to_string(minorRadius) + ");";
     }
 };
 
-// 形状の入力処理を行う関数
+// 独自の関数：形状入力処理
 void inputShape(vector<shared_ptr<Shape>>& shapes) {
     int choice;
     while (true) {
-        // ユーザーに追加する形状を選択させる
         cout << "追加する形状を選択してください (1: 立方体, 2: 球, 3: 円柱, 4: 円錐台, 5: トーラス, 0: 終了): ";
-        cin >> choice;
-        if (choice == 0) break;
+        cin >> choice; // ユーザーに形状の選択を求める
+        if (choice == 0) break; // 0が入力されたらループ終了
 
         if (choice == 1) {
             double width, height, depth, x, y, z;
-            // 立方体の各寸法を入力
             cout << "立方体の幅、高さ、奥行きを入力してください: ";
-            cin >> width >> height >> depth;
-            // 立方体の位置を入力
+            cin >> width >> height >> depth; // 立方体の寸法を入力
             cout << "立方体のx, y, z位置を入力してください: ";
-            cin >> x >> y >> z;
-            // 立方体を生成してリストに追加
-            auto cube = make_shared<Cube>(width, height, depth);
-            cube->setPosition(x, y, z);
-            shapes.push_back(cube);
+            cin >> x >> y >> z; // 立方体の位置を入力
+            auto cube = make_shared<Cube>(width, height, depth); // 立方体のオブジェクトを作成
+            cube->setPosition(x, y, z); // 位置を設定
+            shapes.push_back(cube); // ベクターに追加
         }
         else if (choice == 2) {
             double radius, x, y, z;
-            // 球の半径を入力
             cout << "球の半径を入力してください: ";
-            cin >> radius;
-            // 球の位置を入力
+            cin >> radius; // 球の半径を入力
             cout << "球のx, y, z位置を入力してください: ";
-            cin >> x >> y >> z;
-            // 球を生成してリストに追加
-            auto sphere = make_shared<Sphere>(radius);
-            sphere->setPosition(x, y, z);
-            shapes.push_back(sphere);
+            cin >> x >> y >> z; // 球の位置を入力
+            auto sphere = make_shared<Sphere>(radius); // 球のオブジェクトを作成
+            sphere->setPosition(x, y, z); // 位置を設定
+            shapes.push_back(sphere); // ベクターに追加
         }
         else if (choice == 3) {
             double radius, height, x, y, z;
-            // 円柱の半径と高さを入力
             cout << "円柱の半径と高さを入力してください: ";
-            cin >> radius >> height;
-            // 円柱の位置を入力
+            cin >> radius >> height; // 円柱の半径と高さを入力
             cout << "円柱のx, y, z位置を入力してください: ";
-            cin >> x >> y >> z;
-            // 円柱を生成してリストに追加
-            auto cylinder = make_shared<Cylinder>(radius, height);
-            cylinder->setPosition(x, y, z);
-            shapes.push_back(cylinder);
+            cin >> x >> y >> z; // 円柱の位置を入力
+            auto cylinder = make_shared<Cylinder>(radius, height); // 円柱のオブジェクトを作成
+            cylinder->setPosition(x, y, z); // 位置を設定
+            shapes.push_back(cylinder); // ベクターに追加
         }
         else if (choice == 4) {
             double bottomRadius, topRadius, height, x, y, z;
-            // 円錐台の底面半径、上面半径、高さを入力
             cout << "円錐台の底面半径、上面半径、高さを入力してください: ";
-            cin >> bottomRadius >> topRadius >> height;
-            // 円錐台の位置を入力
+            cin >> bottomRadius >> topRadius >> height; // 円錐台の寸法を入力
             cout << "円錐台のx, y, z位置を入力してください: ";
-            cin >> x >> y >> z;
-            // 円錐台を生成してリストに追加
-            auto frustum = make_shared<Frustum>(bottomRadius, topRadius, height);
-            frustum->setPosition(x, y, z);
-            shapes.push_back(frustum);
+            cin >> x >> y >> z; // 円錐台の位置を入力
+            auto frustum = make_shared<Frustum>(bottomRadius, topRadius, height); // 円錐台のオブジェクトを作成
+            frustum->setPosition(x, y, z); // 位置を設定
+            shapes.push_back(frustum); // ベクターに追加
         }
         else if (choice == 5) {
             double majorRadius, minorRadius, x, y, z;
-            // トーラスの輪の半径と断面の半径を入力
-            cout << "トーラスの輪の半径と断面の半径を入力してください: ";
-            cin >> majorRadius >> minorRadius;
-            // トーラスの位置を入力
+            cout << "トーラスの大半径と小半径を入力してください: ";
+            cin >> majorRadius >> minorRadius; // トーラスの大半径と小半径を入力
             cout << "トーラスのx, y, z位置を入力してください: ";
-            cin >> x >> y >> z;
-            // トーラスを生成してリストに追加
-            auto torus = make_shared<Torus>(majorRadius, minorRadius);
-            torus->setPosition(x, y, z);
-            shapes.push_back(torus);
+            cin >> x >> y >> z; // トーラスの位置を入力
+            auto torus = make_shared<Torus>(majorRadius, minorRadius); // トーラスのオブジェクトを作成
+            torus->setPosition(x, y, z); // 位置を設定
+            shapes.push_back(torus); // ベクターに追加
         }
         else {
-            // 無効な選択肢の処理
             cout << "無効な選択です。もう一度試してください。" << endl;
         }
     }
 }
 
-// 既存ファイルを読み込み内容を文字列ストリームに保存する関数
-void readExistingFile(stringstream& existingContent, const string& filepath) {
-    ifstream file(filepath);
+// 独自の関数：既存ファイル読み込み処理
+string readExistingFile(const string& filepath) {
+    ifstream file(filepath); // 指定されたパスのファイルを開く
     if (!file) {
-        cerr << "既存のファイルを開けませんでした。新しいファイルを作成します。" << endl;
+        cerr << "既存のファイルを開けませんでした。新しいファイルとして処理します。" << endl;
+        return ""; // ファイルがない場合は空文字列を返す
     }
-    else {
-        existingContent << file.rdbuf(); // ファイルの内容を文字列ストリームに読み込む
-        file.close(); // ファイルを閉じる
-    }
+
+    stringstream buffer; // 文字列ストリームを作成
+    buffer << file.rdbuf(); // ファイルの内容をバッファに読み込む
+    return buffer.str(); // バッファの内容を文字列として返す
 }
 
-// 新規ファイルまたは既存ファイルに形状データを書き込む関数
-void writeFile(const vector<shared_ptr<Shape>>& shapes, const string& filepath, bool append) {
-    stringstream existingContent;
+// 独自の関数：ファイル書き込み処理
+void writeFile(const vector<shared_ptr<Shape>>& shapes, const string& filepath) {
+    string existingContent = readExistingFile(filepath); // 既存ファイルの内容を取得
 
-    // 追加モードが選択された場合のみ既存ファイルの内容を読み込む
-    if (append) {
-        readExistingFile(existingContent, filepath);
-    }
-
-    ofstream file(filepath); // ファイル出力ストリームを開く
+    ofstream file(filepath); // ファイルを書き込みモードで開く
     if (!file) {
         cerr << "ファイルを開けませんでした。" << endl;
-        exit(1);
+        exit(1); // エラーで終了
     }
 
-    // 既存の内容を先に書き込み
-    file << existingContent.str();
+    file << existingContent; // 既存の内容をファイルに書き込む
 
-    // 新しい形状を追加
-    for (const auto& shape : shapes) {
-        file << shape->toOpenSCAD() << endl;
+    // begin()とend()を使ったイテレータの使用
+    for (auto it = shapes.begin(); it != shapes.end(); ++it) {
+        file << (*it)->toOpenSCAD() << endl; // 新しい形状をファイルに書き込む
     }
-
     file.close(); // ファイルを閉じる
 }
 
 int main() {
-    vector<shared_ptr<Shape>> shapes; // 形状オブジェクトのポインタを格納するベクター
-    inputShape(shapes); // ユーザーから形状情報を入力させる
+    vector<shared_ptr<Shape>> shapes; // 形状のベクター
+    inputShape(shapes); // 形状の入力を受け付ける
 
     string directory, filename, filepath; // ディレクトリ、ファイル名、ファイルパス
     char choice;
-    bool append = false;
 
-    // 既存ファイルに追加するかどうかを尋ねる
-    cout << "既存のファイルに追加しますか？ (y/n): ";
-    cin >> choice;
-
-    if (choice == 'y' || choice == 'Y') {
-        append = true;
-    }
-
-    // 保存場所を指定するかどうかを尋ねる
     cout << "保存場所を指定しますか？ (y/n): ";
-    cin >> choice;
+    cin >> choice; // 保存場所を指定するかどうかの確認
 
     if (choice == 'y' || choice == 'Y') {
-        // ユーザーに保存するディレクトリを入力させる
         cout << "保存するディレクトリを入力してください (例: ./, /home/user/, C:\\Users\\user\\): ";
-        cin >> directory;
+        cin >> directory; // 保存するディレクトリを入力
     }
     else {
-        // デフォルトのディレクトリを設定
-        directory = "./";
+        directory = "./"; // デフォルトのディレクトリ
         cout << "保存場所を指定しませんでしたので、デフォルトの場所に保存します。" << endl;
     }
 
-    // 保存するファイル名を入力させる
     cout << "保存するファイル名を入力してください（拡張子は不要）: ";
-    cin >> filename;
+    cin >> filename; // ファイル名を入力
 
-    // ファイルパスを生成
-    filepath = directory + filename + ".scad";
-    // 形状データを書き込む
-    writeFile(shapes, filepath, append);
+    filepath = directory + filename + ".scad"; // ファイルパスを生成
+    writeFile(shapes, filepath); // ファイルに書き込み
 
-    // 保存完了メッセージを表示
-    cout << "ファイルが保存されました: " << filepath << endl;
+    cout << "ファイルが保存されました: " << filepath << endl; // ファイル保存完了メッセージ
 
-    return 0; // プログラム終了
+    return 0; // プログラムの終了
 }
