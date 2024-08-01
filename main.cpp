@@ -189,8 +189,8 @@ string readExistingFile(const string& filepath) {
 }
 
 // 独自の関数：ファイル書き込み処理
-void writeFile(const vector<shared_ptr<Shape>>& shapes, const string& filepath) {
-    string existingContent = readExistingFile(filepath); // 既存ファイルの内容を取得
+void writeFile(const vector<shared_ptr<Shape>>& shapes, const string& filepath, bool append) {
+    string existingContent = append ? readExistingFile(filepath) : ""; // 既存ファイルの内容を取得
 
     ofstream file(filepath); // ファイルを書き込みモードで開く
     if (!file) {
@@ -212,7 +212,8 @@ int main() {
     inputShape(shapes); // 形状の入力を受け付ける
 
     string directory, filename, filepath; // ディレクトリ、ファイル名、ファイルパス
-    char choice;
+    char choice, appendChoice;
+    bool append = false;
 
     cout << "保存場所を指定しますか？ (y/n): ";
     cin >> choice; // 保存場所を指定するかどうかの確認
@@ -230,7 +231,15 @@ int main() {
     cin >> filename; // ファイル名を入力
 
     filepath = directory + filename + ".scad"; // ファイルパスを生成
-    writeFile(shapes, filepath); // ファイルに書き込み
+
+    // 既存ファイルに内容を追加するかどうかの確認
+    cout << "既存のファイルがあれば内容を追加しますか？ (y/n): ";
+    cin >> appendChoice;
+    if (appendChoice == 'y' || appendChoice == 'Y') {
+        append = true;
+    }
+
+    writeFile(shapes, filepath, append); // ファイルに書き込み
 
     cout << "ファイルが保存されました: " << filepath << endl; // ファイル保存完了メッセージ
 
