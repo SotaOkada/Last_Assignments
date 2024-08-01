@@ -30,6 +30,5 @@
 9． ”ファイルが保存されました：ファイル名”と表示されたら，プログラムの終了\
 10．OpenSCAD上で保存したファイルを開くと指定した寸法のモデルが指定した場所に表示される．\
 以下に実行した結果を示す．\
-<img src="https://github.com/user-attachments/assets/478bd81e-f412-47dc-8880-7b61fae70844" width="600">
-
-
+<img src="https://github.com/user-attachments/assets/478bd81e-f412-47dc-8880-7b61fae70844" width="600">\
+<img src="https://github.com/user-attachments/assets/914856de-66e1-4c7c-bd65-4f7459bfe586" width="600">
